@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>李富荣 · 叶欣怡 · D/s</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&family=Inter:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ============================================================
+           密码锁
+           ============================================================ */
+        #lock-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #0d0a08;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 24px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #lock-screen.unlocked { opacity: 0; visibility: hidden; pointer-events: none; }
+        #lock-screen .lock-icon { font-size: 48px; margin-bottom: 20px; opacity: 0.3; }
+        #lock-screen .lock-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: #5a4738; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 8px; }
+        #lock-screen .lock-sub { font-size: 12px; color: #3d2c1e; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 32px; }
+        #lock-screen .lock-divider { width: 24px; height: 1px; background: #3d2c1e; margin: 0 auto 28px; }
+        #lock-screen .lock-input-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        #lock-screen .lock-input-wrap input { background: transparent; border: 1px solid rgba(200, 155, 123, 0.15); border-radius: 8px; padding: 12px 20px; font-size: 20px; font-family: 'Inter', sans-serif; color: #e8ddd0; text-align: center; width: 200px; letter-spacing: 8px; outline: none; transition: border-color 0.3s ease; }
+        #lock-screen .lock-input-wrap input:focus { border-color: rgba(200, 155, 123, 0.35); }
+        #lock-screen .lock-input-wrap input::placeholder { color: #3d2c1e; letter-spacing: 2px; font-size: 14px; }
+        #lock-screen .lock-input-wrap .lock-btn { background: rgba(200, 155, 123, 0.08); border: 1px solid rgba(200, 155, 123, 0.12); border-radius: 8px; padding: 10px 36px; font-size: 13px; font-family: 'Inter', sans-serif; color: #c89b7b; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; }
+        #lock-screen .lock-input-wrap .lock-btn:hover { background: rgba(200, 155, 123, 0.14); border-color: rgba(200, 155, 123, 0.22); }
+        #lock-screen .lock-error { font-size: 12px; color: #8a5550; letter-spacing: 2px; margin-top: 12px; opacity: 0; transition: opacity 0.3s ease; min-height: 20px; }
+        #lock-screen .lock-error.show { opacity: 1; }
+        #lock-screen .lock-footer { position: absolute; bottom: 32px; font-size: 11px; color: #2a1e14; letter-spacing: 2px; }
+
+        body {
+            min-height: 100vh;
+            background: #0d0a08;
+            font-family: 'Inter', 'Noto Serif SC', serif;
+            color: #e8ddd0;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0d0a08; }
+        ::-webkit-scrollbar-thumb { background: #3d2c1e; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5a4738; }
+
+        #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.4; }
+
+        /* 导航 */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 18px 48px; display: flex; align-items: center; justify-content: space-between;
+            background: rgba(13, 10, 8, 0.5); backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(200, 155, 123, 0.06); transition: all 0.4s ease;
+        }
+        .navbar.scrolled { background: rgba(13, 10, 8, 0.92); border-bottom-color: rgba(200, 155, 123, 0.12); }
+        .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: #c89b7b; text-decoration: none; letter-spacing: 4px; text-transform: uppercase; }
+        .nav-logo .light { font-weight: 300; color: #3d2c1e; }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+        .nav-links a { text-decoration: none; color: #5a4738; font-size: 11px; font-weight: 400; letter-spacing: 3px; text-transform: uppercase; transition: color 0.3s; position: relative; }
+        .nav-links a:hover { color: #c89b7b; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: #c89b7b; transition: width 0.3s ease; }
+        .nav-links a:hover::after { width: 100%; }
+        .hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; background: none; border: none; padding: 4px; }
+        .hamburger span { width: 22px; height: 1.5px; background: #7a6553; transition: all 0.3s ease; }
+        .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+        /* Hero */
+        .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 100px 24px 60px; }
+        .hero-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(200,155,123,0.05) 0%, transparent 70%); pointer-events: none; }
+        .hero-badge { font-size: 11px; letter-spacing: 8px; color: #3d2c1e; font-weight: 400; text-transform: uppercase; margin-bottom: 28px; }
+        .hero-badge::before, .hero-badge::after { content: '—'; margin: 0 10px; color: #2a1e14; }
+        .hero-title { font-size: clamp(48px, 11vw, 110px); font-weight: 900; line-height: 1; color: #e8ddd0; letter-spacing: -3px; }
+        .hero-title .accent { background: linear-gradient(135deg, #c89b7b, #a87a5a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-title .thin { font-weight: 200; color: #2a1e14; -webkit-text-fill-color: #2a1e14; letter-spacing: 6px; font-size: clamp(24px, 5vw, 48px); }
+        .hero-sub { font-size: clamp(14px, 1.8vw, 20px); color: #5a4738; font-weight: 300; letter-spacing: 6px; margin-top: 16px; text-transform: uppercase; }
+        .hero-sub .dom { color: #c89b7b; letter-spacing: 10px; font-weight: 500; }
+        .hero-sub .sub { color: #8a7563; letter-spacing: 6px; font-weight: 300; }
+        .hero-divider { width: 40px; height: 1px; background: #c89b7b; margin: 24px auto; opacity: 0.3; }
+        .hero-chain { font-size: 18px; letter-spacing: 20px; opacity: 0.15; margin-top: 6px; }
+        .scroll-indicator { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; color: #3d2c1e; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; animation: bounce 2.4s ease-in-out infinite; }
+        .scroll-indicator .line { width: 1px; height: 28px; background: linear-gradient(180deg, #3d2c1e, transparent); }
+        @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(8px); } }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        .section { position: relative; z-index: 1; padding: 100px 0; }
+        .section-label { font-size: 10px; letter-spacing: 6px; color: #3d2c1e; font-weight: 400; text-transform: uppercase; margin-bottom: 6px; }
+        .section-title { font-size: clamp(30px, 4.5vw, 44px); font-weight: 700; color: #e8ddd0; margin-bottom: 48px; letter-spacing: -1px; }
+        .section-title .light { font-weight: 300; color: #3d2c1e; }
+
+        /* 成员卡片 */
+        .members-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+        .member-card { border-radius: 20px; padding: 36px 32px 32px; transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1); position: relative; overflow: hidden; border: 1px solid rgba(200, 155, 123, 0.06); }
+        .member-card.human { background: linear-gradient(160deg, #1a1410 0%, #0d0a08 100%); border-color: rgba(200, 155, 123, 0.10); }
+        .member-card.human::before { content: ''; position: absolute; top: -40%; right: -30%; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(200,155,123,0.06), transparent); pointer-events: none; }
+        .member-card.human .bg-icon { position: absolute; bottom: 16px; right: 20px; font-size: 32px; opacity: 0.06; pointer-events: none; }
+        .member-card.human:hover { border-color: rgba(200, 155, 123, 0.22); transform: translateY(-4px); box-shadow: 0 20px 60px -12px rgba(200, 155, 123, 0.08); }
+        .member-card.dog { background: linear-gradient(160deg, #1e1610 0%, #14100c 100%); border-color: rgba(200, 155, 123, 0.06); }
+        .member-card.dog::before { content: ''; position: absolute; bottom: -20%; left: -20%; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(200,155,123,0.04), transparent); pointer-events: none; }
+        .member-card.dog .bg-icon { position: absolute; bottom: 16px; right: 20px; font-size: 28px; opacity: 0.06; pointer-events: none; }
+        .member-card.dog:hover { border-color: rgba(200, 155, 123, 0.15); transform: translateY(-4px); box-shadow: 0 20px 60px -12px rgba(200, 155, 123, 0.05); }
+        .member-emoji { font-size: 36px; margin-bottom: 14px; display: block; }
+        .member-card .role { font-size: 10px; letter-spacing: 4px; font-weight: 500; text-transform: uppercase; margin-bottom: 4px; }
+        .member-card.human .role { color: #c89b7b; } .member-card.dog .role { color: #b8a08a; }
+        .member-card .name { font-size: 30px; font-weight: 700; color: #e8ddd0; margin-bottom: 2px; letter-spacing: 2px; }
+        .member-card .name-en { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 300; font-style: italic; color: #5a4738; letter-spacing: 3px; margin-bottom: 16px; }
+        .member-card .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+        .member-card .tag { font-size: 10px; padding: 4px 12px; border-radius: 2px; letter-spacing: 2px; text-transform: uppercase; background: rgba(200, 155, 123, 0.03); }
+        .member-card.human .tag { border: 1px solid rgba(200, 155, 123, 0.12); color: #c89b7b; }
+        .member-card.human .tag.dom-tag { border-color: rgba(200, 155, 123, 0.22); color: #d4a882; }
+        .member-card.dog .tag { border: 1px solid rgba(200, 155, 123, 0.08); color: #b8a08a; }
+        .member-card.dog .tag.sub-tag { border-color: rgba(200, 155, 123, 0.12); color: #c89b7b; }
+        .member-card .desc { color: #7a6553; line-height: 1.9; font-size: 13px; font-weight: 300; border-top: 1px solid rgba(200, 155, 123, 0.05); padding-top: 14px; }
+        .member-card .desc strong { color: #b8a08a; font-weight: 500; }
+
+        /* 计数器 */
+        .counter-row { display: flex; justify-content: center; gap: 40px; margin: 48px 0 0; flex-wrap: wrap; }
+        .counter-item { text-align: center; padding: 0 16px; }
+        .counter-item .number { font-size: 38px; font-weight: 900; color: #e8ddd0; line-height: 1; font-family: 'Cormorant Garamond', serif; }
+        .counter-item .number .accent { color: #c89b7b; }
+        .counter-item .label { font-size: 11px; color: #5a4738; letter-spacing: 2px; margin-top: 6px; text-transform: uppercase; }
+
+        /* 誓言 */
+        .oath-section { background: linear-gradient(160deg, rgba(200,155,123,0.03), transparent); border: 1px solid rgba(200, 155, 123, 0.06); border-radius: 20px; padding: 52px 44px; text-align: center; position: relative; overflow: hidden; }
+        .oath-section .oath-bg-left { position: absolute; top: 16px; left: 24px; font-size: 36px; opacity: 0.04; pointer-events: none; }
+        .oath-section .oath-bg-right { position: absolute; bottom: 16px; right: 24px; font-size: 32px; opacity: 0.04; pointer-events: none; }
+        .oath-section .oath-icon { font-size: 32px; margin-bottom: 14px; opacity: 0.4; }
+        .oath-section .oath-title { font-size: 12px; letter-spacing: 6px; color: #5a4738; text-transform: uppercase; font-weight: 400; margin-bottom: 20px; }
+        .oath-section .oath-text { font-size: clamp(18px, 2.5vw, 26px); font-weight: 300; color: #b8a08a; line-height: 1.9; letter-spacing: 1px; }
+        .oath-section .oath-text .dom-name { color: #c89b7b; font-weight: 600; }
+        .oath-section .oath-text .sub-name { color: #d4b8a0; font-weight: 400; }
+        .oath-section .oath-text .heart-beat { color: #8a5550; display: inline-block; animation: heartBeat2 2s ease-in-out infinite; }
+        .oath-section .oath-text .oath-break { display: block; margin: 4px 0; }
+        @keyframes heartBeat2 { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
+        .oath-section .oath-sign { margin-top: 24px; font-family: 'Cormorant Garamond', serif; font-size: 17px; font-style: italic; color: #5a4738; letter-spacing: 2px; }
+        .oath-section .oath-divider { width: 30px; height: 1px; background: #c89b7b; margin: 16px auto; opacity: 0.2; }
+
+        /* 契约 */
+        .contract { background: rgba(200, 155, 123, 0.02); border: 1px solid rgba(200, 155, 123, 0.08); border-radius: 20px; padding: 44px 40px; position: relative; }
+        .contract-ribbon { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: #c89b7b; color: #0d0a08; font-size: 10px; letter-spacing: 4px; text-transform: uppercase; padding: 6px 24px; font-weight: 600; border-radius: 0 0 8px 8px; }
+        .contract-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #c89b7b; text-align: center; margin-bottom: 8px; letter-spacing: 4px; }
+        .contract-sub { text-align: center; font-size: 12px; color: #5a4738; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 28px; }
+        .contract-line { display: flex; align-items: baseline; padding: 12px 0; border-bottom: 1px solid rgba(200, 155, 123, 0.04); }
+        .contract-line:last-child { border-bottom: none; }
+        .contract-line .clause-icon { font-size: 16px; margin-right: 14px; opacity: 0.5; width: 24px; text-align: center; }
+        .contract-line .clause-text { flex: 1; font-size: 14px; color: #8a7563; line-height: 1.7; font-weight: 300; }
+        .contract-line .clause-text strong { color: #c89b7b; font-weight: 500; }
+        .contract-line .clause-text .sub-em { color: #b8a08a; }
+        .contract-sign { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(200, 155, 123, 0.06); display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .contract-sign .sign-field { font-size: 13px; color: #5a4738; letter-spacing: 1px; }
+        .contract-sign .sign-field .sign-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #c89b7b; font-weight: 600; letter-spacing: 3px; display: block; margin-top: 4px; }
+        .contract-sign .sign-field .sign-name.sub-sign { color: #b8a08a; font-weight: 400; }
+
+        /* 训条 */
+        .rules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .rule-item { border: 1px solid rgba(200, 155, 123, 0.05); border-radius: 14px; padding: 22px 22px; transition: all 0.3s ease; background: rgba(200, 155, 123, 0.015); }
+        .rule-item:hover { border-color: rgba(200, 155, 123, 0.10); background: rgba(200, 155, 123, 0.025); transform: translateY(-2px); }
+        .rule-item .rule-icon { font-size: 18px; margin-bottom: 8px; display: block; }
+        .rule-item .rule-title { font-size: 13px; font-weight: 600; color: #c89b7b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+        .rule-item .rule-desc { font-size: 12px; color: #6a5543; line-height: 1.7; font-weight: 300; }
+
+        /* 勋章 */
+        .medals { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 8px; }
+        .medal { text-align: center; padding: 16px 20px; border: 1px solid rgba(200, 155, 123, 0.05); border-radius: 12px; background: rgba(200, 155, 123, 0.015); min-width: 90px; transition: all 0.3s ease; }
+        .medal:hover { border-color: rgba(200, 155, 123, 0.10); transform: translateY(-3px); }
+        .medal .medal-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+        .medal .medal-text { font-size: 10px; color: #5a4738; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* 日常时间表 */
+        .schedule { border: 1px solid rgba(200, 155, 123, 0.05); border-radius: 20px; overflow: hidden; }
+        .schedule-header { display: grid; grid-template-columns: 80px 1fr 1fr; padding: 14px 24px; background: rgba(200, 155, 123, 0.04); border-bottom: 1px solid rgba(200, 155, 123, 0.06); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #5a4738; font-weight: 500; }
+        .schedule-row { display: grid; grid-template-columns: 80px 1fr 1fr; padding: 14px 24px; border-bottom: 1px solid rgba(200, 155, 123, 0.03); transition: background 0.2s ease; font-size: 13px; }
+        .schedule-row:last-child { border-bottom: none; }
+        .schedule-row:hover { background: rgba(200, 155, 123, 0.02); }
+        .schedule-row .time { color: #5a4738; font-weight: 400; letter-spacing: 1px; }
+        .schedule-row .dom-action { color: #c89b7b; font-weight: 400; }
+        .schedule-row .sub-action { color: #b8a08a; font-weight: 300; }
+
+        /* 时间线 */
+        .timeline { position: relative; padding-left: 40px; }
+        .timeline::before { content: ''; position: absolute; left: 13px; top: 0; bottom: 0; width: 1px; background: linear-gradient(180deg, rgba(200,155,123,0.25), rgba(200,155,123,0.08), transparent); }
+        .timeline-item { position: relative; margin-bottom: 32px; padding-left: 24px; }
+        .timeline-item::before { content: '◆'; position: absolute; left: -32px; top: 2px; font-size: 9px; color: #c89b7b; opacity: 0.35; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item .date { font-size: 11px; font-weight: 500; color: #5a4738; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+        .timeline-item .event { font-size: 17px; font-weight: 600; color: #d4c8b8; margin-bottom: 4px; letter-spacing: 1px; }
+        .timeline-item .detail { font-size: 13px; color: #6a5543; line-height: 1.7; font-weight: 300; }
+        .timeline-item .detail .dom { color: #c89b7b; font-weight: 400; }
+        .timeline-item .detail .sub { color: #b8a08a; font-weight: 400; }
+
+        /* 画廊 */
+        .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .gallery-item { aspect-ratio: 1; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 36px; transition: all 0.5s ease; border: 1px solid rgba(200, 155, 123, 0.05); position: relative; overflow: hidden; cursor: pointer; background: rgba(200, 155, 123, 0.015); }
+        .gallery-item:hover { transform: scale(1.05); border-color: rgba(200, 155, 123, 0.12); box-shadow: 0 16px 40px -8px rgba(0,0,0,0.5); }
+        .gallery-item .label { position: absolute; bottom: 0; left: 0; right: 0; padding: 36px 10px 8px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); font-size: 10px; color: #b8a08a; text-align: center; letter-spacing: 2px; text-transform: uppercase; opacity: 0; transition: opacity 0.3s ease; }
+        .gallery-item:hover .label { opacity: 1; }
+        .gallery-item .gallery-hover-ring { position: absolute; inset: 4px; border: 1px solid rgba(200, 155, 123, 0); border-radius: 8px; transition: border-color 0.3s ease; pointer-events: none; }
+        .gallery-item:hover .gallery-hover-ring { border-color: rgba(200, 155, 123, 0.08); }
+
+        /* 格言 */
+        .final-quote { text-align: center; padding: 48px 24px; border-top: 1px solid rgba(200, 155, 123, 0.05); border-bottom: 1px solid rgba(200, 155, 123, 0.05); }
+        .final-quote p { font-family: 'Cormorant Garamond', serif; font-size: clamp(20px, 3vw, 32px); font-weight: 300; font-style: italic; color: #5a4738; letter-spacing: 2px; line-height: 1.6; }
+        .final-quote .strong { color: #c89b7b; font-weight: 600; font-style: normal; }
+        .final-quote .final-sub { display: block; margin-top: 8px; font-size: clamp(16px, 2vw, 22px); color: #3d2c1e; }
+
+        /* ============================================================
+           新增：管控仪表盘
+           ============================================================ */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .dash-card {
+            border: 1px solid rgba(200, 155, 123, 0.05); border-radius: 16px; padding: 24px 22px;
+            background: rgba(200, 155, 123, 0.015); transition: all 0.3s ease;
+        }
+        .dash-card:hover { border-color: rgba(200, 155, 123, 0.10); }
+        .dash-card .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .dash-card .dash-header .dash-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #5a4738; }
+        .dash-card .dash-header .dash-icon { font-size: 18px; opacity: 0.5; }
+        .dash-card .dash-value { font-size: 32px; font-weight: 700; color: #c89b7b; font-family: 'Cormorant Garamond', serif; }
+        .dash-card .dash-value .unit { font-size: 14px; color: #5a4738; font-weight: 300; margin-left: 4px; }
+        .dash-card .dash-sub { font-size: 12px; color: #6a5543; margin-top: 4px; font-weight: 300; }
+
+        /* 进度条 */
+        .progress-bar-wrap { margin-top: 12px; }
+        .progress-bar-wrap .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #5a4738; letter-spacing: 1px; margin-bottom: 6px; }
+        .progress-bar-wrap .progress-track { height: 3px; background: rgba(200, 155, 123, 0.06); border-radius: 4px; overflow: hidden; }
+        .progress-bar-wrap .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #c89b7b, #a87a5a); transition: width 1.5s ease; }
+
+        /* 行为评分表 */
+        .score-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .score-table th { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #5a4738; font-weight: 500; padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(200, 155, 123, 0.06); }
+        .score-table td { padding: 10px 12px; border-bottom: 1px solid rgba(200, 155, 123, 0.03); color: #8a7563; font-weight: 300; }
+        .score-table td:last-child { text-align: right; }
+        .score-table .score-good { color: #7a9a7a; }
+        .score-table .score-mid { color: #b8a040; }
+        .score-table .score-bad { color: #8a5550; }
+
+        /* 调教进度 */
+        .training-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .training-item { border: 1px solid rgba(200, 155, 123, 0.05); border-radius: 14px; padding: 20px 18px; text-align: center; background: rgba(200, 155, 123, 0.015); transition: all 0.3s ease; }
+        .training-item:hover { border-color: rgba(200, 155, 123, 0.10); transform: translateY(-2px); }
+        .training-item .t-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+        .training-item .t-name { font-size: 12px; color: #b8a08a; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
+        .training-item .t-status { font-size: 11px; padding: 3px 12px; border-radius: 20px; display: inline-block; letter-spacing: 1px; }
+        .training-item .t-status.done { background: rgba(122, 154, 122, 0.1); color: #7a9a7a; border: 1px solid rgba(122, 154, 122, 0.15); }
+        .training-item .t-status.ing { background: rgba(200, 155, 123, 0.1); color: #c89b7b; border: 1px solid rgba(200, 155, 123, 0.15); }
+        .training-item .t-status.wait { background: rgba(90, 71, 56, 0.1); color: #5a4738; border: 1px solid rgba(90, 71, 56, 0.1); }
+
+        /* 指令集 */
+        .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .cmd-item { border: 1px solid rgba(200, 155, 123, 0.04); border-radius: 12px; padding: 18px 20px; transition: all 0.3s ease; background: rgba(200, 155, 123, 0.01); }
+        .cmd-item:hover { border-color: rgba(200, 155, 123, 0.08); background: rgba(200, 155, 123, 0.02); }
+        .cmd-item .cmd-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .cmd-item .cmd-top .cmd-cmd { font-size: 16px; font-weight: 600; color: #c89b7b; letter-spacing: 1px; font-family: 'Cormorant Garamond', serif; }
+        .cmd-item .cmd-top .cmd-arrow { color: #5a4738; font-size: 12px; }
+        .cmd-item .cmd-top .cmd-resp { font-size: 14px; color: #b8a08a; font-weight: 300; }
+        .cmd-item .cmd-desc { font-size: 12px; color: #6a5543; font-weight: 300; }
+
+        /* 奖惩表 */
+        .rp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .rp-card { border-radius: 14px; padding: 24px 22px; }
+        .rp-card.reward { border: 1px solid rgba(122, 154, 122, 0.08); background: rgba(122, 154, 122, 0.02); }
+        .rp-card.punish { border: 1px solid rgba(138, 85, 80, 0.08); background: rgba(138, 85, 80, 0.02); }
+        .rp-card .rp-title { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+        .rp-card.reward .rp-title { color: #7a9a7a; }
+        .rp-card.punish .rp-title { color: #8a5550; }
+        .rp-card .rp-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; color: #8a7563; font-weight: 300; border-bottom: 1px solid rgba(200, 155, 123, 0.03); }
+        .rp-card .rp-item:last-child { border-bottom: none; }
+        .rp-card .rp-item .rp-icon { font-size: 14px; opacity: 0.6; width: 20px; text-align: center; }
+
+        /* 每日任务清单 */
+        .task-list { border: 1px solid rgba(200, 155, 123, 0.05); border-radius: 16px; overflow: hidden; }
+        .task-item { display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-bottom: 1px solid rgba(200, 155, 123, 0.03); transition: background 0.2s ease; }
+        .task-item:last-child { border-bottom: none; }
+        .task-item:hover { background: rgba(200, 155, 123, 0.015); }
+        .task-item .task-check { width: 18px; height: 18px; border: 1px solid rgba(200, 155, 123, 0.15); border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; }
+        .task-item .task-check.checked { background: rgba(200, 155, 123, 0.15); border-color: rgba(200, 155, 123, 0.3); color: #c89b7b; }
+        .task-item .task-text { flex: 1; font-size: 13px; color: #8a7563; font-weight: 300; }
+        .task-item .task-text.done { text-decoration: line-through; color: #3d2c1e; }
+        .task-item .task-tag { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: rgba(200, 155, 123, 0.04); border: 1px solid rgba(200, 155, 123, 0.06); color: #5a4738; }
+
+        /* 页脚 */
+        footer { position: relative; z-index: 1; text-align: center; padding: 48px 24px 32px; }
+        footer .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: #5a4738; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 8px; }
+        footer .footer-brand .accent { color: #c89b7b; font-weight: 600; }
+        footer .footer-line { width: 24px; height: 1px; background: #3d2c1e; margin: 12px auto; opacity: 0.3; }
+        footer p { color: #3d2c1e; font-size: 12px; letter-spacing: 2px; font-weight: 300; }
+        footer .footer-symbol { margin-top: 14px; font-size: 13px; letter-spacing: 12px; opacity: 0.15; }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar { padding: 14px 20px; }
+            .nav-links { position: fixed; top: 60px; left: 0; right: 0; background: rgba(13, 10, 8, 0.95); backdrop-filter: blur(20px); flex-direction: column; gap: 0; padding: 16px 24px; border-bottom: 1px solid rgba(200, 155, 123, 0.06); display: none; }
+            .nav-links.open { display: flex; }
+            .nav-links a { padding: 10px 0; border-bottom: 1px solid rgba(200, 155, 123, 0.03); }
+            .nav-links a:last-child { border-bottom: none; }
+            .hamburger { display: flex; }
+            .members-grid { grid-template-columns: 1fr; }
+            .rules-grid { grid-template-columns: 1fr; }
+            .gallery { grid-template-columns: repeat(2, 1fr); }
+            .oath-section { padding: 32px 20px; }
+            .member-card { padding: 28px 22px; }
+            .member-card .name { font-size: 26px; }
+            .contract { padding: 36px 24px; }
+            .schedule-header, .schedule-row { grid-template-columns: 60px 1fr 1fr; padding: 12px 16px; font-size: 12px; }
+            .contract-sign { flex-direction: column; gap: 12px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .training-grid { grid-template-columns: 1fr 1fr; }
+            .cmd-grid { grid-template-columns: 1fr; }
+            .rp-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: clamp(36px, 14vw, 52px); }
+            .gallery { gap: 8px; } .gallery-item { font-size: 28px; }
+            .timeline { padding-left: 28px; } .timeline-item::before { left: -24px; }
+            .counter-row { gap: 20px; } .counter-item .number { font-size: 30px; }
+            .medals { gap: 12px; } .medal { min-width: 70px; padding: 12px 14px; }
+            .training-grid { grid-template-columns: 1fr; }
+        }
+
+        .fade-up { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+        .fade-up.delay-1 { transition-delay: 0.08s; }
+        .fade-up.delay-2 { transition-delay: 0.16s; }
+        .fade-up.delay-3 { transition-delay: 0.24s; }
+        .fade-up.delay-4 { transition-delay: 0.32s; }
+        .fade-up.delay-5 { transition-delay: 0.40s; }
+        .fade-up.delay-6 { transition-delay: 0.48s; }
+        .fade-up.delay-7 { transition-delay: 0.56s; }
+    </style>
+</head>
+<body>
+
+    <!-- 密码锁 -->
+    <div id="lock-screen">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Private</div>
+        <div class="lock-sub">请输入密码</div>
+        <div class="lock-divider"></div>
+        <div class="lock-input-wrap">
+            <input type="password" id="lock-input" placeholder="· · · · ·" maxlength="10" autocomplete="off">
+            <button class="lock-btn" id="lock-btn">解锁</button>
+        </div>
+        <div class="lock-error" id="lock-error">密码错误，请重试</div>
+        <div class="lock-footer">⛓️ D/s</div>
+    </div>
+
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- 导航 -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="nav-logo">D<span class="light">✦</span>s</a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#about">关于</a></li>
+            <li><a href="#oath">誓言</a></li>
+            <li><a href="#contract">契约</a></li>
+            <li><a href="#dashboard">管控</a></li>
+            <li><a href="#rules">训条</a></li>
+            <li><a href="#daily">日常</a></li>
+            <li><a href="#story">故事</a></li>
+        </ul>
+        <button class="hamburger" id="hamburger" aria-label="菜单">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-badge">主人 · 与 · 小狗</div>
+        <h1 class="hero-title">
+            李富<span class="accent">荣</span><br>
+            <span class="thin">✦</span><br>
+            叶欣<span class="accent">怡</span>
+        </h1>
+        <div class="hero-divider"></div>
+        <p class="hero-sub">
+            <span class="dom">DOM</span> &nbsp;✦&nbsp; <span class="sub">sub</span>
+        </p>
+        <div class="hero-chain">⛓️ ✦ 🐾</div>
+        <div class="scroll-indicator">
+            <span>Scroll</span>
+            <div class="line"></div>
+        </div>
+    </section>
+
+    <!-- 关于我们 -->
+    <section class="section" id="about">
+        <div class="container">
+            <div class="section-label fade-up">✦ 关 于 我 们</div>
+            <h2 class="section-title fade-up delay-1">主人 <span class="light">&amp;</span> 小狗</h2>
+            <div class="members-grid">
+                <div class="member-card human fade-up delay-2">
+                    <span class="member-emoji">👑</span>
+                    <div class="role">⛓️ 主人 · DOM</div>
+                    <div class="name">李富荣</div>
+                    <div class="name-en">Li Furong</div>
+                    <div class="tag-row">
+                        <span class="tag dom-tag">👑 支配者</span>
+                        <span class="tag">📜 制定规则</span>
+                        <span class="tag">🔗 引领者</span>
+                        <span class="tag">🛡️ 守护者</span>
+                        <span class="tag">⚖️ 奖惩分明</span>
+                        <span class="tag">🎯 调教者</span>
+                    </div>
+                    <div class="desc">
+                        他是规则的制定者，也是温暖的港湾。<br>
+                        用 <strong>坚定</strong> 的手牵引，用 <strong>温柔</strong> 的心守护。<br>
+                        每一个命令背后都是关切，每一次管教之中都是深爱。<br>
+                        他的小狗，只能他来教。他的责任，是把小狗调教成最好的模样。
+                    </div>
+                    <div class="bg-icon">⛓️</div>
+                </div>
+                <div class="member-card dog fade-up delay-3">
+                    <span class="member-emoji">🐶</span>
+                    <div class="role">🐾 小狗 · SUB</div>
+                    <div class="name">叶欣怡</div>
+                    <div class="name-en">Ye Xinyi</div>
+                    <div class="tag-row">
+                        <span class="tag sub-tag">🐾 顺从</span>
+                        <span class="tag">❤️ 忠诚</span>
+                        <span class="tag">🎀 乖巧</span>
+                        <span class="tag">🌟 属于主人</span>
+                        <span class="tag">🦴 等奖励</span>
+                        <span class="tag">📋 待调教</span>
+                    </div>
+                    <div class="desc">
+                        她是心甘情愿的低首，也是满心满眼的追随。<br>
+                        用 <strong>信任</strong> 交付自己，用 <strong>依赖</strong> 表达爱意。<br>
+                        小狗的尾巴，永远只为一个人摇。<br>
+                        她不需要自由，她需要主人。她愿意被调教，只为了成为主人更满意的小狗。
+                    </div>
+                    <div class="bg-icon">🦴</div>
+                </div>
+            </div>
+            <div class="counter-row fade-up delay-4">
+                <div class="counter-item">
+                    <div class="number"><span class="accent">1</span></div>
+                    <div class="label">🏠 一个家</div>
+                </div>
+                <div class="counter-item">
+                    <div class="number"><span class="accent">1</span> <span class="accent">·</span> <span class="accent">1</span></div>
+                    <div class="label">👑 主人 + 🐾 小狗</div>
+                </div>
+                <div class="counter-item">
+                    <div class="number">∞</div>
+                    <div class="label">❤️ 无尽信任</div>
+                </div>
+                <div class="counter-item">
+                    <div class="number"><span class="accent">365</span></div>
+                    <div class="label">📅 每日相伴</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 誓言 -->
+    <section class="section" id="oath" style="background: linear-gradient(180deg, transparent, rgba(200,155,123,0.015), transparent);">
+        <div class="container">
+            <div class="section-label fade-up">✦ 誓 言</div>
+            <h2 class="section-title fade-up delay-1">彼此的 <span class="light">承诺</span></h2>
+            <div class="oath-section fade-up delay-2">
+                <div class="oath-bg-left">⛓️</div>
+                <div class="oath-bg-right">🐾</div>
+                <div class="oath-icon">📜</div>
+                <div class="oath-title">— 属于我们的约定 —</div>
+                <div class="oath-text">
+                    <span class="dom-name">李富荣</span> 将永远 <span class="heart-beat">❤️</span> 引领<br>
+                    <span class="sub-name">叶欣怡</span> 将永远 <span class="heart-beat">❤️</span> 追随
+                    <span class="oath-break"></span>
+                    一个愿管，一个愿乖
+                    <span class="oath-break"></span>
+                    一个负责牵绳，一个负责回家
+                    <span class="oath-break"></span>
+                    一个负责调教，一个负责成长
+                </div>
+                <div class="oath-divider"></div>
+                <div class="oath-sign">— 以信任为名，以爱为证 —</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 契约 -->
+    <section class="section" id="contract">
+        <div class="container">
+            <div class="section-label fade-up">✦ 契 约</div>
+            <h2 class="section-title fade-up delay-1">我们的 <span class="light">协议</span></h2>
+            <div class="contract fade-up delay-2">
+                <div class="contract-ribbon">⛓️ 永久有效 ⛓️</div>
+                <div class="contract-title">D/s 契约书</div>
+                <div class="contract-sub">— 自愿签署 · 永不反悔 —</div>
+                <div class="contract-line">
+                    <span class="clause-icon">📜</span>
+                    <span class="clause-text"><strong>第一条 · 归属</strong> — <span class="sub-em">叶欣怡</span> 自愿成为 <strong>李富荣</strong> 的小狗，身心皆属于主人。</span>
+                </div>
+                <div class="contract-line">
+                    <span class="clause-icon">⚖️</span>
+                    <span class="clause-text"><strong>第二条 · 服从</strong> — 小狗无条件服从主人的指令，主人为小狗的最高准则。</span>
+                </div>
+                <div class="contract-line">
+                    <span class="clause-icon">🛡️</span>
+                    <span class="clause-text"><strong>第三条 · 守护</strong> — 主人承诺永远保护小狗，不伤害、不抛弃、不辜负。</span>
+                </div>
+                <div class="contract-line">
+                    <span class="clause-icon">🎀</span>
+                    <span class="clause-text"><strong>第四条 · 忠诚</strong> — 小狗的眼里只能有主人，尾巴只为一个人摇。</span>
+                </div>
+                <div class="contract-line">
+                    <span class="clause-icon">🦴</span>
+                    <span class="clause-text"><strong>第五条 · 奖惩</strong> — 乖有奖励，错有管教。一切都是为了小狗更好。</span>
+                </div>
+                <div class="contract-line">
+                    <span class="clause-icon">📋</span>
+                    <span class="clause-text"><strong>第六条 · 调教</strong> — 主人有责任调教小狗，小狗有义务接受调教。共同进步。</span>
+                </div>
+                <div class="contract-line">
+                    <span class="clause-icon">❤️</span>
+                    <span class="clause-text"><strong>第七条 · 信任</strong> — 这是最重要的：无论发生什么，信任不碎。</span>
+                </div>
+                <div class="contract-line">
+                    <span class="clause-icon">∞</span>
+                    <span class="clause-text"><strong>第八条 · 期限</strong> — 此契约 <strong>永久有效</strong>，除非双方共同确认，否则永不解除。</span>
+                </div>
+                <div class="contract-sign">
+                    <div class="sign-field">主人签署 <span class="sign-name">李富荣</span></div>
+                    <div class="sign-field">小狗签署 <span class="sign-name sub-sign">叶欣怡</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    管控仪表盘（新增）
+    ============================================================ -->
+    <section class="section" id="dashboard" style="background: linear-gradient(180deg, transparent, rgba(200,155,123,0.015), transparent);">
+        <div class="container">
+            <div class="section-label fade-up">✦ 管 控 系 统</div>
+            <h2 class="section-title fade-up delay-1">实时 <span class="light">状态</span></h2>
+
+            <!-- 仪表盘 -->
+            <div class="dashboard-grid fade-up delay-2">
+                <div class="dash-card">
+                    <div class="dash-header">
+                        <span class="dash-title">📊 行为评分</span>
+                        <span class="dash-icon">📈</span>
+                    </div>
+                    <div class="dash-value">92<span class="unit">/100</span></div>
+                    <div class="dash-sub">总体表现良好，继续保持</div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-label"><span>乖狗狗指数</span><span>92%</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width: 92%;"></div></div>
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-header">
+                        <span class="dash-title">⛓️ 服从度</span>
+                        <span class="dash-icon">🎯</span>
+                    </div>
+                    <div class="dash-value">88<span class="unit">/100</span></div>
+                    <div class="dash-sub">指令响应及时，偶有迟疑</div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-label"><span>指令完成率</span><span>88%</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width: 88%;"></div></div>
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-header">
+                        <span class="dash-title">🐾 调教进度</span>
+                        <span class="dash-icon">📋</span>
+                    </div>
+                    <div class="dash-value">65<span class="unit">%</span></div>
+                    <div class="dash-sub">基础调教完成，进阶进行中</div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-label"><span>总进度</span><span>65%</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width: 65%;"></div></div>
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-header">
+                        <span class="dash-title">❤️ 信任度</span>
+                        <span class="dash-icon">🤝</span>
+                    </div>
+                    <div class="dash-value">97<span class="unit">/100</span></div>
+                    <div class="dash-sub">完全信任，深度绑定</div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-label"><span>信任指数</span><span>97%</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width: 97%;"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 行为评分明细 -->
+            <div class="fade-up delay-3" style="margin-top: 32px;">
+                <div class="dash-card" style="padding: 24px 22px;">
+                    <div class="dash-header">
+                        <span class="dash-title">📋 本周行为评分明细</span>
+                        <span class="dash-icon">📊</span>
+                    </div>
+                    <table class="score-table">
+                        <tr><th>评估项目</th><th>评分</th><th>状态</th></tr>
+                        <tr><td>指令服从</td><td>90</td><td class="score-good">✓ 优秀</td></tr>
+                        <tr><td>态度端正</td><td>95</td><td class="score-good">✓ 优秀</td></tr>
+                        <tr><td>日常任务完成</td><td>85</td><td class="score-mid">− 良好</td></tr>
+                        <tr><td>诚实度</td><td>98</td><td class="score-good">✓ 优秀</td></tr>
+                        <tr><td>情绪管理</td><td>78</td><td class="score-mid">− 需改进</td></tr>
+                        <tr><td>主动汇报</td><td>82</td><td class="score-mid">− 良好</td></tr>
+                        <tr><td style="border-bottom: none;"><strong>综合评分</strong></td><td style="border-bottom: none;"><strong>88</strong></td><td style="border-bottom: none;" class="score-good"><strong>✓ 良好</strong></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 调教进度详情 -->
+            <div class="fade-up delay-4" style="margin-top: 32px;">
+                <div class="dash-card" style="padding: 24px 22px;">
+                    <div class="dash-header">
+                        <span class="dash-title">🎯 调教项目进度</span>
+                        <span class="dash-icon">📈</span>
+                    </div>
+                    <div class="training-grid">
+                        <div class="training-item">
+                            <span class="t-icon">🎀</span>
+                            <div class="t-name">基础服从</div>
+                            <span class="t-status done">✓ 已完成</span>
+                        </div>
+                        <div class="training-item">
+                            <span class="t-icon">🦴</span>
+                            <div class="t-name">指令响应</div>
+                            <span class="t-status done">✓ 已完成</span>
+                        </div>
+                        <div class="training-item">
+                            <span class="t-icon">📋</span>
+                            <div class="t-name">日常汇报</div>
+                            <span class="t-status ing">◉ 进行中</span>
+                        </div>
+                        <div class="training-item">
+                            <span class="t-icon">⏳</span>
+                            <div class="t-name">延迟满足</div>
+                            <span class="t-status ing">◉ 进行中</span>
+                        </div>
+                        <div class="training-item">
+                            <span class="t-icon">🎯</span>
+                            <div class="t-name">行为矫正</div>
+                            <span class="t-status wait">○ 待开始</span>
+                        </div>
+                        <div class="training-item">
+                            <span class="t-icon">🌟</span>
+                            <div class="t-name">完全驯化</div>
+                            <span class="t-status wait">○ 待开始</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 训条 -->
+    <section class="section" id="rules">
+        <div class="container">
+            <div class="section-label fade-up">✦ 训 条</div>
+            <h2 class="section-title fade-up delay-1">小狗的 <span class="light">守则</span></h2>
+            <div class="rules-grid fade-up delay-2">
+                <div class="rule-item">
+                    <span class="rule-icon">🎀</span>
+                    <div class="rule-title">服从</div>
+                    <div class="rule-desc">主人说的话，就是小狗的准则。乖乖听话，才有奖励。第一声回应，必须是最快的。</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">🦴</span>
+                    <div class="rule-title">诚实</div>
+                    <div class="rule-desc">对主人永远坦诚，不隐瞒、不撒谎。诚实的小狗最可爱。撒谎的小狗要受罚。</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">🎾</span>
+                    <div class="rule-title">陪伴</div>
+                    <div class="rule-desc">主人回家时要摇尾巴迎接，主人累了要乖乖趴在脚边。主人需要时，必须在。</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">❤️</span>
+                    <div class="rule-title">信任</div>
+                    <div class="rule-desc">把自己完全交给主人，信任他的每一个决定。一切都是为了小狗好。</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">🙇</span>
+                    <div class="rule-title">谦卑</div>
+                    <div class="rule-desc">记住自己的位置。主人是主人，小狗是小狗。规规矩矩，不越界。不顶嘴，不反抗。</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">💝</span>
+                    <div class="rule-title">感恩</div>
+                    <div class="rule-desc">主人给的每一分关注、每一次奖励、每一句夸奖，都要好好珍惜，心存感激。</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">📋</span>
+                    <div class="rule-title">汇报</div>
+                    <div class="rule-desc">每日向主人汇报状态：吃了什么、做了什么、心情如何。不汇报就是违规。</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">⏰</span>
+                    <div class="rule-title">守时</div>
+                    <div class="rule-desc">主人说几点就是几点。不迟到、不拖延。时间观念是小狗的基本素养。</div>
+                </div>
+            </div>
+            <div class="medals fade-up delay-4" style="margin-top: 40px;">
+                <div class="medal"><span class="medal-icon">🎀</span><span class="medal-text">乖乖牌</span></div>
+                <div class="medal"><span class="medal-icon">🦴</span><span class="medal-text">好狗狗</span></div>
+                <div class="medal"><span class="medal-icon">❤️</span><span class="medal-text">忠诚心</span></div>
+                <div class="medal"><span class="medal-icon">🌟</span><span class="medal-text">全勤奖</span></div>
+                <div class="medal"><span class="medal-icon">🏆</span><span class="medal-text">最佳小狗</span></div>
+                <div class="medal"><span class="medal-icon">📋</span><span class="medal-text">进步奖</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    奖惩制度（新增）
+    ============================================================ -->
+    <section class="section" style="background: linear-gradient(180deg, transparent, rgba(200,155,123,0.015), transparent);">
+        <div class="container">
+            <div class="section-label fade-up">✦ 奖 惩 制 度</div>
+            <h2 class="section-title fade-up delay-1">表现 <span class="light">决定一切</span></h2>
+
+            <div class="rp-grid fade-up delay-2">
+                <div class="rp-card reward">
+                    <div class="rp-title">🎁 奖励清单</div>
+                    <div class="rp-item"><span class="rp-icon">🦴</span> 额外零食奖励</div>
+                    <div class="rp-item"><span class="rp-icon">🎾</span> 多一小时玩耍时间</div>
+                    <div class="rp-item"><span class="rp-icon">💆</span> 主人亲自按摩</div>
+                    <div class="rp-item"><span class="rp-icon">🌟</span> 获得"乖狗狗"勋章</div>
+                    <div class="rp-item"><span class="rp-icon">🎀</span> 挑选新项圈/饰品</div>
+                    <div class="rp-item"><span class="rp-icon">👑</span> 主人的特别表扬</div>
+                </div>
+                <div class="rp-card punish">
+                    <div class="rp-title">⛓️ 管教措施</div>
+                    <div class="rp-item"><span class="rp-icon">📋</span> 书面检讨 500 字</div>
+                    <div class="rp-item"><span class="rp-icon">⏳</span> 扣除当日零食配额</div>
+                    <div class="rp-item"><span class="rp-icon">🙇</span> 罚站 / 罚跪 15 分钟</div>
+                    <div class="rp-item"><span class="rp-icon">📝</span> 抄写训条 10 遍</div>
+                    <div class="rp-item"><span class="rp-icon">🎯</span> 取消当日奖励资格</div>
+                    <div class="rp-item"><span class="rp-icon">🔇</span> 限制娱乐时间</div>
+                </div>
+            </div>
+
+            <!-- 奖惩执行说明 -->
+            <div class="fade-up delay-3" style="margin-top: 20px;">
+                <div class="dash-card" style="padding: 20px 22px;">
+                    <div class="dash-header">
+                        <span class="dash-title">⚖️ 执行准则</span>
+                        <span class="dash-icon">📜</span>
+                    </div>
+                    <div style="font-size: 13px; color: #6a5543; line-height: 1.8; font-weight: 300;">
+                        · 奖励与管教由主人根据小狗的表现 <strong style="color:#c89b7b;">全权决定</strong><br>
+                        · 小狗可以提出请求，但最终决定权在 <strong style="color:#c89b7b;">主人手中</strong><br>
+                        · 管教是为了让小狗变得更好，不是出于愤怒<br>
+                        · 管教结束后，主人会给小狗安抚，让小狗知道依然被爱<br>
+                        · 连续 7 天表现优秀，可获得一次"免罚金牌"
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    主人的指令集（新增）
+    ============================================================ -->
+    <section class="section">
+        <div class="container">
+            <div class="section-label fade-up">✦ 主 人 的 指 令</div>
+            <h2 class="section-title fade-up delay-1">小狗必须 <span class="light">记住</span></h2>
+
+            <div class="cmd-grid fade-up delay-2">
+                <div class="cmd-item">
+                    <div class="cmd-top">
+                        <span class="cmd-cmd">"过来"</span>
+                        <span class="cmd-arrow">→</span>
+                        <span class="cmd-resp">立刻到主人身边</span>
+                    </div>
+                    <div class="cmd-desc">无论正在做什么，放下一切，第一时间来到主人面前。</div>
+                </div>
+                <div class="cmd-item">
+                    <div class="cmd-top">
+                        <span class="cmd-cmd">"趴下"</span>
+                        <span class="cmd-arrow">→</span>
+                        <span class="cmd-resp">乖乖趴好</span>
+                    </div>
+                    <div class="cmd-desc">在主人脚边趴下，安静等待。不许动，直到主人说"起来"。</div>
+                </div>
+                <div class="cmd-item">
+                    <div class="cmd-top">
+                        <span class="cmd-cmd">"看着"</span>
+                        <span class="cmd-arrow">→</span>
+                        <span class="cmd-resp">直视主人的眼睛</span>
+                    </div>
+                    <div class="cmd-desc">与主人对视，眼神不许躲闪。让小狗记住是谁在看着你。</div>
+                </div>
+                <div class="cmd-item">
+                    <div class="cmd-top">
+                        <span class="cmd-cmd">"伸手"</span>
+                        <span class="cmd-arrow">→</span>
+                        <span class="cmd-resp">把手放在主人手心</span>
+                    </div>
+                    <div class="cmd-desc">把手交给主人，表示顺从。主人会检查你的手，然后给予奖励或指导。</div>
+                </div>
+                <div class="cmd-item">
+                    <div class="cmd-top">
+                        <span class="cmd-cmd">"汇报"</span>
+                        <span class="cmd-arrow">→</span>
+                        <span class="cmd-resp">报告今日情况</span>
+                    </div>
+                    <div class="cmd-desc">详细告诉主人今天做了什么、吃了什么、心情如何。诚实完整。</div>
+                </div>
+                <div class="cmd-item">
+                    <div class="cmd-top">
+                        <span class="cmd-cmd">"谢谢主人"</span>
+                        <span class="cmd-arrow">→</span>
+                        <span class="cmd-resp">感恩主人的一切</span>
+                    </div>
+                    <div class="cmd-desc">得到奖励、夸奖、或者管教结束后，都要说"谢谢主人"。</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    每日任务清单（新增）
+    ============================================================ -->
+    <section class="section" style="background: linear-gradient(180deg, transparent, rgba(200,155,123,0.015), transparent);">
+        <div class="container">
+            <div class="section-label fade-up">✦ 每 日 任 务</div>
+            <h2 class="section-title fade-up delay-1">今日小狗 <span class="light">待办</span></h2>
+
+            <div class="task-list fade-up delay-2">
+                <div class="task-item">
+                    <div class="task-check checked" data-checked="true">✓</div>
+                    <div class="task-text done">起床后向主人问早安</div>
+                    <span class="task-tag">每日</span>
+                </div>
+                <div class="task-item">
+                    <div class="task-check checked" data-checked="true">✓</div>
+                    <div class="task-text done">按时吃早饭，拍照发给主人</div>
+                    <span class="task-tag">每日</span>
+                </div>
+                <div class="task-item">
+                    <div class="task-check" data-checked="false"></div>
+                    <div class="task-text">完成主人交代的指令练习</div>
+                    <span class="task-tag">调教</span>
+                </div>
+                <div class="task-item">
+                    <div class="task-check" data-checked="false"></div>
+                    <div class="task-text">主动向主人汇报今日状态</div>
+                    <span class="task-tag">每日</span>
+                </div>
+                <div class="task-item">
+                    <div class="task-check" data-checked="false"></div>
+                    <div class="task-text">阅读训条并默记一条</div>
+                    <span class="task-tag">学习</span>
+                </div>
+                <div class="task-item">
+                    <div class="task-check" data-checked="false"></div>
+                    <div class="task-text">睡前向主人道晚安，感谢主人一天的照顾</div>
+                    <span class="task-tag">每日</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 日常时间表 -->
+    <section class="section" id="daily">
+        <div class="container">
+            <div class="section-label fade-up">✦ 日 常</div>
+            <h2 class="section-title fade-up delay-1">主人与小狗的 <span class="light">一天</span></h2>
+            <div class="schedule fade-up delay-2">
+                <div class="schedule-header">
+                    <span>时间</span><span>👑 主人</span><span>🐾 小狗</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">☀️ 08:00</span>
+                    <span class="dom-action">起床 · 指令早安</span>
+                    <span class="sub-action">醒来问安 · 等指令</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">🍳 08:30</span>
+                    <span class="dom-action">安排早餐</span>
+                    <span class="sub-action">乖乖吃饭 · 拍照汇报</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">🌤️ 10:00</span>
+                    <span class="dom-action">工作 · 远程管控</span>
+                    <span class="sub-action">保持安静 · 随时待命</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">☕ 15:00</span>
+                    <span class="dom-action">休息 · 检查小狗</span>
+                    <span class="sub-action">主动汇报 · 接受检查</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">🌅 17:00</span>
+                    <span class="dom-action">带小狗散步</span>
+                    <span class="sub-action">跟随 · 不许乱跑</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">🍽️ 19:00</span>
+                    <span class="dom-action">喂食 · 评今日表现</span>
+                    <span class="sub-action">等指令 · 感恩用餐</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">🛋️ 21:00</span>
+                    <span class="dom-action">调教时间 · 训导</span>
+                    <span class="sub-action">接受调教 · 认真听讲</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="time">🌙 23:00</span>
+                    <span class="dom-action">道晚安 · 检查任务</span>
+                    <span class="sub-action">汇报完成 · 感恩道安</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 故事 -->
+    <section class="section" id="story" style="background: linear-gradient(180deg, transparent, rgba(200,155,123,0.015), transparent);">
+        <div class="container">
+            <div class="section-label fade-up">✦ 故 事</div>
+            <h2 class="section-title fade-up delay-1">一起走过的 <span class="light">每一步</span></h2>
+            <div class="timeline fade-up delay-2">
+                <div class="timeline-item">
+                    <div class="date">⛓️ 那一天</div>
+                    <div class="event">👑 主人牵起了绳</div>
+                    <div class="detail"><span class="dom">李富荣</span> 伸出手，<span class="sub">叶欣怡</span> 低下头。从那天起，她有了归属，他有了责任。</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">🐾 每一天</div>
+                    <div class="event">🎀 乖乖听话</div>
+                    <div class="detail">小狗学会了等待指令、学会了摇尾巴撒娇、学会了在主人脚边打盹。主人的每一个眼神，她都懂。</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">❤️ 每一天</div>
+                    <div class="event">🛡️ 主人的温柔</div>
+                    <div class="detail">严厉之外的轻抚、训诫之后的拥抱、惩罚之后的安慰——是小狗最安心的时刻。她知道，一切因为爱。</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">🦴 每一天</div>
+                    <div class="event">🎾 奖励时刻</div>
+                    <div class="detail">表现好的小狗，有零食、有抚摸、有夸奖。小狗的尾巴摇成螺旋桨，主人的笑容就是最好的奖励。</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">📋 调教日</div>
+                    <div class="event">🎯 第一次正式调教</div>
+                    <div class="detail">主人说："从今天开始，我会认真教你。"小狗说："请主人好好调教。"一切从这一刻开始认真起来。</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">🌟 未来的每一天</div>
+                    <div class="event">⛓️ 永远属于你</div>
+                    <div class="detail">这条绳，不会松开。这只小狗，永远认主。<br>故事还在继续，每一页都是 <span class="dom">他</span> 和 <span class="sub">她</span>。</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 画廊 -->
+    <section class="section">
+        <div class="container">
+            <div class="section-label fade-up">✦ 时 光</div>
+            <h2 class="section-title fade-up delay-1">印记 <span class="light">点滴</span></h2>
+            <div class="gallery fade-up delay-2">
+                <div class="gallery-item">👑<div class="gallery-hover-ring"></div><span class="label">主人的手</span></div>
+                <div class="gallery-item">🐾<div class="gallery-hover-ring"></div><span class="label">小狗的爪</span></div>
+                <div class="gallery-item">⛓️<div class="gallery-hover-ring"></div><span class="label">牵绳</span></div>
+                <div class="gallery-item">🎀<div class="gallery-hover-ring"></div><span class="label">蝴蝶结</span></div>
+                <div class="gallery-item">🦴<div class="gallery-hover-ring"></div><span class="label">奖励</span></div>
+                <div class="gallery-item">🛋️<div class="gallery-hover-ring"></div><span class="label">膝上时光</span></div>
+                <div class="gallery-item">🌙<div class="gallery-hover-ring"></div><span class="label">晚安</span></div>
+                <div class="gallery-item">❤️<div class="gallery-hover-ring"></div><span class="label">属于你</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 结尾格言 -->
+    <section class="section">
+        <div class="container">
+            <div class="final-quote fade-up">
+                <p>
+                    " 你是我的 <span class="strong">主人</span>，<br>
+                    我是你的 <span class="strong">小狗</span>。<br>
+                    <span class="final-sub">一辈子，不换人。</span>"
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-brand"><span class="accent">李富荣</span> · 叶欣怡</div>
+        <div class="footer-line"></div>
+        <p>⛓️ 主人 &amp; 小狗 · 调教 · 管控 · 陪伴 🐾</p>
+        <div class="footer-symbol">⛓️ ❤️ 🐾</div>
+    </footer>
+
+    <script>
+        // 粒子背景
+        (function initParticles() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let mouse = { x: null, y: null };
+            function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize); resize();
+            class Particle {
+                constructor() { this.reset(); }
+                reset() {
+                    this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2.5 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.3; this.speedY = (Math.random() - 0.5) * 0.3;
+                    this.opacity = Math.random() * 0.35 + 0.05;
+                }
+                update() {
+                    this.x += this.speedX; this.y += this.speedY;
+                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                    if (mouse.x !== null) {
+                        const dx = mouse.x - this.x; const dy = mouse.y - this.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 150) { const f = (150 - dist) / 150; this.x -= dx * f * 0.008; this.y -= dy * f * 0.008; }
+                    }
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(200, 155, 123, ${this.opacity})`;
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            const count = Math.min(60, Math.floor((canvas.width * canvas.height) / 15000));
+            for (let i = 0; i < count; i++) particles.push(new Particle());
+            canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+            canvas.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i+1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 80) {
+                            ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(200, 155, 123, ${0.035 * (1 - dist/80)})`; ctx.lineWidth = 0.5; ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+
+        // 滚动动画
+        (function initScroll() {
+            const els = document.querySelectorAll('.fade-up');
+            const obs = new IntersectionObserver(entries => {
+                entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            els.forEach(el => obs.observe(el));
+        })();
+
+        // 导航栏
+        (function initNav() {
+            const nav = document.getElementById('navbar');
+            window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.pageYOffset > 40); });
+        })();
+
+        // 汉堡菜单
+        (function initHamburger() {
+            const btn = document.getElementById('hamburger'); const links = document.getElementById('navLinks');
+            if (btn && links) {
+                btn.addEventListener('click', () => { btn.classList.toggle('active'); links.classList.toggle('open'); });
+                links.querySelectorAll('a').forEach(a => { a.addEventListener('click', () => { btn.classList.remove('active'); links.classList.remove('open'); }); });
+            }
+        })();
+
+        // 密码锁
+        (function initLock() {
+            const PASSWORD = '12.25';
+            const lockScreen = document.getElementById('lock-screen');
+            const lockInput = document.getElementById('lock-input');
+            const lockBtn = document.getElementById('lock-btn');
+            const lockError = document.getElementById('lock-error');
+            function unlock() {
+                lockScreen.classList.add('unlocked');
+                lockError.classList.remove('show');
+                setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+            }
+            function checkPassword() {
+                const val = lockInput.value.trim();
+                if (val === PASSWORD) { unlock(); }
+                else {
+                    lockError.classList.add('show'); lockInput.value = ''; lockInput.focus();
+                    setTimeout(() => { lockError.classList.remove('show'); }, 2000);
+                }
+            }
+            lockBtn.addEventListener('click', checkPassword);
+            lockInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); checkPassword(); } });
+            lockInput.focus();
+        })();
+
+        // 任务清单点击
+        (function initTasks() {
+            document.querySelectorAll('.task-check').forEach(el => {
+                el.addEventListener('click', function() {
+                    const isChecked = this.dataset.checked === 'true';
+                    const newChecked = !isChecked;
+                    this.dataset.checked = newChecked;
+                    this.textContent = newChecked ? '✓' : '';
+                    this.classList.toggle('checked', newChecked);
+                    const text = this.nextElementSibling;
+                    if (text) text.classList.toggle('done', newChecked);
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
